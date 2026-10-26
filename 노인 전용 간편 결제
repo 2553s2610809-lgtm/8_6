@@ -1,1 +1,96 @@
+import tkinter as tk
+from tkinter import messagebox
+from datetime import datetime
+
+# 편한결제 - 노인 전용 간편 결제 앱 (시연용)
+# 실제 금융기관과 연결되지 않으며, 잔액/거래는 프로그램 내부의 가상 데이터입니다.
+
+BG = "#EAF2FA"
+BLUE = "#1769AA"
+DARK_BLUE = "#174A78"
+TEXT_BLUE = "#58738D"
+SILVER = "#D7E0E8"
+WHITE = "#FFFFFF"
+FONT = "Malgun Gothic"
+
+balance = 125000
+transactions = [
+    {"kind": "결제", "name": "동네 마트", "amount": -5000,
+     "time": "오늘 오후 2:10"},
+    {"kind": "결제", "name": "동네 약국", "amount": -8000,
+     "time": "오늘 오전 11:30"},
+]
+
+
+def won(amount):
+    return f"{amount:,}원"
+
+
+class EasyPayApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("편한결제")
+        self.root.geometry("940x590")
+        self.root.minsize(760, 540)
+        self.root.configure(bg=BG)
+        self.show_home()
+
+    def clear(self):
+        for child in self.root.winfo_children():
+            child.destroy()
+
+    def card(self, parent, bg=WHITE, **kwargs):
+        frame = tk.Frame(parent, bg=bg, **kwargs)
+        return frame
+
+    def label(self, parent, text, size=16, color=DARK_BLUE, bold=False, bg=WHITE):
+        return tk.Label(
+            parent, text=text, font=(FONT, size, "bold" if bold else "normal"),
+            fg=color, bg=bg
+        )
+
+    def button(self, parent, text, command, bg=WHITE, fg=DARK_BLUE,
+               size=19, height=2):
+        return tk.Button(
+            parent, text=text, command=command, bg=bg, fg=fg,
+            activebackground=bg, activeforeground=fg,
+            font=(FONT, size, "bold"), relief="flat", bd=0,
+            cursor="hand2", height=height, wraplength=320
+        )
+
+    def header(self, parent):
+        bar = tk.Frame(parent, bg=BG)
+        bar.pack(fill="x", padx=14, pady=(14, 16))
+        logo = tk.Label(bar, text="▣", bg=BLUE, fg=WHITE,
+                        font=(FONT, 26, "bold"), width=3, height=1)
+        logo.pack(side="left", padx=(0, 12), ipady=7)
+        titlebox = tk.Frame(bar, bg=BG)
+        titlebox.pack(side="left")
+        self.label(titlebox, "편한결제", 22, DARK_BLUE, True, BG).pack(anchor="w")
+        self.label(titlebox, "누구나 쉽고 편하게", 13, TEXT_BLUE, False, BG).pack(anchor="w")
+        tk.Button(bar, text="?", command=self.show_help, bg=BG, fg=BLUE,
+                  font=(FONT, 18, "bold"), relief="flat", bd=0,
+                  cursor="hand2").pack(side="right", padx=8)
+
+    def show_home(self):
+        self.clear()
+        self.root.configure(bg=BG)
+        self.header(self.root)
+
+        balance_card = self.card(self.root, WHITE)
+        balance_card.pack(fill="x", padx=14, pady=(0, 14), ipady=17)
+        self.label(balance_card, "내 잔액", 15, TEXT_BLUE, bg=WHITE).pack(
+            anchor="w", padx=20, pady=(8, 5))
+        self.balance_label = self.label(balance_card, won(balance), 28,
+                                        DARK_BLUE, True, WHITE)
+        self.balance_label.pack(anchor="w", padx=20, pady=2)
+        self.label(balance_card, "♢  안전하게 관리되는 내 돈", 14,
+                   TEXT_BLUE, bg=WHITE).pack(anchor="w", padx=20, pady=(6, 4))
+
+        grid = tk.Frame(self.root, bg=BG)
+        grid.pack(fill="both", expand=True, padx=14, pady=(0, 12))
+        grid.columnconfigure(0, weight=1, uniform="col")
+        grid.columnconfigure(1, weight=1, uniform="col")
+        grid.rowconfigure(0, weight=1, uniform="row")
+        grid.rowconfigure(1, weight=1, uniform="row")
 
