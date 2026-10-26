@@ -1,10 +1,10 @@
 import streamlit as st
 
+# 기본 설정
 st.set_page_config(
     page_title="천천히 키오스크",
     page_icon="☕",
-    layout="centered",
-    initial_sidebar_state="collapsed"
+    layout="centered"
 )
 
 # 세션 상태 초기화
@@ -28,7 +28,6 @@ st.markdown(
     h1 {{
         color: #654321;
         text-align: center;
-        font-size: 38px !important;
     }}
 
     h2, h3 {{
@@ -42,37 +41,16 @@ st.markdown(
 
     div.stButton > button {{
         width: 100%;
-        min-height: 65px;
-        font-size: {font_size} !important;
+        min-height: 60px;
+        font-size: {font_size};
         font-weight: bold;
-        border-radius: 15px;
+        border-radius: 12px;
         border: 2px solid #C8A27A;
-        background-color: #FFFFFF;
-        color: #493322;
     }}
 
     div.stButton > button:hover {{
         background-color: #F1DFC7;
         border-color: #8B5E3C;
-        color: #493322;
-    }}
-
-    .welcome {{
-        background-color: #F3E3CE;
-        padding: 25px;
-        border-radius: 18px;
-        text-align: center;
-        color: #493322;
-        font-size: {font_size};
-        line-height: 1.8;
-        margin-bottom: 20px;
-    }}
-
-    .footer {{
-        text-align: center;
-        color: #6D5A48;
-        font-size: 16px;
-        padding: 15px;
     }}
     </style>
     """,
@@ -81,29 +59,27 @@ st.markdown(
 
 
 # 페이지 이동 함수
-def go_to(page):
+def move_page(page):
     st.session_state.page = page
-    st.rerun()
 
 
-# 메인 화면
+# 공통 제목
+st.title("☕ 천천히 키오스크")
+st.caption("어르신을 위한 쉬운 키오스크 사용 연습")
+
+
+# =================================
+# 1. 메인 화면
+# =================================
 if st.session_state.page == "home":
 
-    st.title("☕ 천천히 키오스크")
+    st.subheader("안녕하세요!")
 
-    st.markdown(
-        """
-        <div class="welcome">
-            <strong>안녕하세요!</strong><br>
-            키오스크 사용이 어려우신가요?<br>
-            걱정하지 마세요.<br>
-            천천히 하나씩 함께 배워봐요!
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.info(
+        "키오스크 사용이 어려우신가요?\n\n"
+        "걱정하지 마세요. 천천히 하나씩 배워봐요!"
     )
 
-    # 글씨 크기 조절
     if st.button(
         "🔎 글씨 크기 바꾸기",
         use_container_width=True
@@ -122,51 +98,39 @@ if st.session_state.page == "home":
         "☕ 키오스크 주문 연습하기",
         use_container_width=True
     ):
-        go_to("practice")
+        move_page("order")
+        st.rerun()
 
     if st.button(
         "📖 키오스크 사용 방법 배우기",
         use_container_width=True
     ):
-        go_to("guide")
+        move_page("guide")
+        st.rerun()
 
     if st.button(
         "💡 자주 묻는 질문",
         use_container_width=True
     ):
-        go_to("faq")
+        move_page("faq")
+        st.rerun()
 
     st.divider()
 
-    st.markdown(
-        """
-        <div class="welcome">
-            <strong>기억하세요!</strong><br>
-            실수해도 괜찮습니다.<br>
-            천천히 읽고 따라 하면 됩니다.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        """
-        <div class="footer">
-            누구나 쉽게 사용할 수 있는 디지털 세상을 위해
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.success(
+        "실수해도 괜찮습니다!\n\n"
+        "천천히 읽고 따라 해 보세요."
     )
 
 
-# 키오스크 주문 연습 화면
-elif st.session_state.page == "practice":
+# =================================
+# 2. 키오스크 주문 연습
+# =================================
+elif st.session_state.page == "order":
 
-    st.title("☕ 주문 연습하기")
+    st.header("☕ 주문 연습하기")
 
-    st.write(
-        "원하는 음료를 선택하고 주문 과정을 연습해 보세요."
-    )
+    st.write("원하는 음료를 선택해 주세요.")
 
     menu = {
         "아메리카노": 2500,
@@ -188,81 +152,113 @@ elif st.session_state.page == "practice":
     total = menu[drink] * quantity
 
     st.subheader("주문 확인")
-    st.write(f"선택한 음료: {drink}")
-    st.write(f"수량: {quantity}잔")
-    st.write(f"총금액: {total:,}원")
 
-    st.info(
-        "이 화면은 주문 연습용입니다. "
-        "실제 결제는 이루어지지 않습니다."
+    st.write(f"선택한 음료: {drink}")
+    st.write(f"주문 수량: {quantity}잔")
+
+    st.success(f"총금액: {total:,}원")
+
+    st.warning(
+        "연습용 화면입니다. 실제 결제는 이루어지지 않습니다."
     )
 
-    if st.button("🏠 메인 화면으로 돌아가기"):
-        go_to("home")
+    if st.button(
+        "🏠 메인 화면으로 돌아가기",
+        use_container_width=True
+    ):
+        move_page("home")
+        st.rerun()
 
 
-# 사용 방법 안내 화면
+# =================================
+# 3. 키오스크 사용 방법
+# =================================
 elif st.session_state.page == "guide":
 
-    st.title("📖 사용 방법 배우기")
+    st.header("📖 키오스크 사용 방법")
 
-    st.subheader("1. 원하는 메뉴 고르기")
+    st.subheader("1. 메뉴 선택하기")
     st.write(
-        "화면에 있는 메뉴를 천천히 읽고 "
-        "먹고 싶은 음료를 선택하세요."
+        "화면에서 먹고 싶은 음식이나 음료를 선택하세요."
     )
 
-    st.subheader("2. 주문 수량 선택하기")
+    st.subheader("2. 수량 선택하기")
     st.write(
-        "몇 잔을 주문할지 선택하고 "
-        "총금액을 확인하세요."
+        "주문할 음식이나 음료가 몇 개인지 선택하세요."
     )
 
-    st.subheader("3. 주문 내용 확인하기")
+    st.subheader("3. 금액 확인하기")
     st.write(
-        "메뉴와 수량이 맞는지 확인한 후 "
-        "다음 단계로 이동하세요."
+        "선택한 메뉴와 수량, 총금액이 맞는지 확인하세요."
     )
 
     st.subheader("4. 결제하기")
     st.write(
-        "실제 매장에서는 화면의 안내에 따라 "
-        "결제를 진행하세요. 어려우면 직원에게 "
-        "도움을 요청해도 괜찮습니다."
+        "실제 매장에서는 화면의 안내에 따라 결제하세요. "
+        "어려우면 직원에게 도움을 요청해도 괜찮습니다."
     )
 
-    if st.button("🏠 메인 화면으로 돌아가기"):
-        go_to("home")
+    st.info(
+        "모든 키오스크의 사용 방법이 같지는 않습니다. "
+        "화면에 나오는 안내를 천천히 확인하세요."
+    )
+
+    if st.button(
+        "🏠 메인 화면으로 돌아가기",
+        use_container_width=True
+    ):
+        move_page("home")
+        st.rerun()
 
 
-# 자주 묻는 질문 화면
+# =================================
+# 4. 자주 묻는 질문
+# =================================
 elif st.session_state.page == "faq":
 
-    st.title("💡 자주 묻는 질문")
+    st.header("💡 자주 묻는 질문")
 
     with st.expander("메뉴를 잘못 선택했어요."):
+
         st.write(
-            "괜찮습니다. 이전 화면으로 돌아가 "
-            "원하는 메뉴를 다시 선택하면 됩니다."
+            "괜찮습니다. 주문을 확정하기 전이라면 "
+            "이전 화면으로 돌아가 다시 선택할 수 있습니다."
         )
 
     with st.expander("글씨가 너무 작아요."):
+
         st.write(
             "메인 화면의 '글씨 크기 바꾸기' 버튼을 "
-            "눌러 글씨 크기를 조절할 수 있습니다."
+            "눌러 글씨 크기를 조절하세요."
         )
 
     with st.expander("결제 방법을 모르겠어요."):
+
         st.write(
-            "화면의 결제 안내를 천천히 읽어 보세요. "
-            "필요하면 매장 직원에게 도움을 요청하세요."
+            "화면의 안내를 천천히 읽어 보세요. "
+            "어려우면 매장 직원에게 도움을 요청하세요."
         )
 
-    with st.expander("실수하면 어떻게 하나요?"):
+    with st.expander("주문하다가 실수하면 어떡하죠?"):
+
         st.write(
-            "주문을 확정하기 전에는 이전 화면으로 "
-            "돌아가 내용을 확인할 수 있습니다."
+            "당황하지 마세요. 주문 내용을 다시 확인하고 "
+            "필요하면 직원에게 도움을 요청하세요."
         )
 
-    if st.button("🏠 메인 화면으로 돌아가기"):
-        go_to("home")
+    if st.button(
+        "🏠 메인 화면으로 돌아가기",
+        use_container_width=True
+    ):
+        move_page("home")
+        st.rerun()
+
+
+# =================================
+# 하단 안내
+# =================================
+st.divider()
+
+st.caption(
+    "천천히 키오스크 | 누구나 쉽게 배우는 디지털 세상"
+)
