@@ -1,3 +1,4 @@
+```python
 import streamlit as st
 
 # 기본 설정
@@ -262,3 +263,4 @@ st.divider()
 st.caption(
     "천천히 키오스크 | 누구나 쉽게 배우는 디지털 세상"
 )
+```
