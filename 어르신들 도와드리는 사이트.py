@@ -1,17 +1,17 @@
 import streamlit as st
 
-# -----------------------------
-# 기본 설정
-# -----------------------------
+# =====================================
+# 1. 기본 설정
+# =====================================
 st.set_page_config(
     page_title="천천히 키오스크",
     page_icon="☕",
     layout="wide"
 )
 
-# -----------------------------
-# 화면 상태 설정
-# -----------------------------
+# =====================================
+# 2. 화면 상태 설정
+# =====================================
 if "page" not in st.session_state:
     st.session_state.page = "home"
 
@@ -34,9 +34,9 @@ if "selected_count" not in st.session_state:
     st.session_state.selected_count = 1
 
 
-# -----------------------------
-# 글씨 크기 설정
-# -----------------------------
+# =====================================
+# 3. 글씨 크기 설정
+# =====================================
 FONT_SIZES = {
     0: {
         "name": "작은 글씨",
@@ -71,9 +71,9 @@ title_size = font_setting["title"]
 button_size = font_setting["button"]
 
 
-# -----------------------------
-# 배경 및 글씨 디자인
-# -----------------------------
+# =====================================
+# 4. 화면 디자인
+# =====================================
 st.markdown(
     f"""
     <style>
@@ -83,7 +83,6 @@ st.markdown(
 
     html, body, [class*="css"] {{
         font-family: 'Noto Sans KR', sans-serif;
-        font-size: {font_size}px;
     }}
 
     .stApp {{
@@ -118,31 +117,27 @@ st.markdown(
         color: #315d45 !important;
     }}
 
-    p, label, li, .stMarkdown {{
+    p, li, .stMarkdown {{
         font-size: {font_size}px;
         line-height: 1.7;
     }}
 
     div.stButton > button {{
-        min-height: 64px;
-        border-radius: 16px;
+        min-height: 76px;
+        border-radius: 18px;
         font-size: {button_size}px !important;
         font-weight: 700;
         border: 2px solid #b7d4bf;
         background-color: #ffffff;
         color: #24543c;
-        padding: 12px 18px;
+        padding: 12px 14px;
+        white-space: pre-wrap;
     }}
 
     div.stButton > button:hover {{
         border-color: #397c54;
         background-color: #e9f5e9;
         color: #17452d;
-    }}
-
-    div[data-testid="stAlert"] {{
-        border-radius: 16px;
-        font-size: {font_size}px;
     }}
 
     div[data-testid="stSelectbox"] label,
@@ -158,7 +153,7 @@ st.markdown(
     }}
 
     .welcome-box {{
-        background: rgba(255, 255, 255, 0.88);
+        background: rgba(255, 255, 255, 0.92);
         border: 3px solid #c5dfc8;
         border-radius: 24px;
         padding: 28px;
@@ -173,7 +168,7 @@ st.markdown(
     }}
 
     .drink-box {{
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.94);
         border: 2px solid #d2e5d3;
         border-radius: 20px;
         padding: 16px;
@@ -195,20 +190,15 @@ st.markdown(
         font-size: {int(font_size * 0.85)}px;
         color: #52665a;
     }}
-
-    .small-note {{
-        color: #52665a;
-        font-size: {int(font_size * 0.75)}px;
-    }}
     </style>
     """,
     unsafe_allow_html=True
 )
 
 
-# -----------------------------
-# 음료 목록
-# -----------------------------
+# =====================================
+# 5. 음료 목록
+# =====================================
 DRINKS = {
     "아메리카노": {"emoji": "☕", "price": 2500},
     "카페라떼": {"emoji": "🥛", "price": 3500},
@@ -237,16 +227,16 @@ DRINKS = {
 }
 
 
-# -----------------------------
-# 공통 기능
-# -----------------------------
+# =====================================
+# 6. 공통 기능
+# =====================================
 def go_to(page_name):
     st.session_state.page = page_name
     st.rerun()
 
 
 def font_button():
-    st.markdown(f"**현재 글씨 크기: {font_name}**")
+    st.markdown(f"### 현재 글씨 크기: {font_name}")
 
     if st.button(
         "🔎 글씨 크기 바꾸기",
@@ -260,23 +250,44 @@ def font_button():
         st.rerun()
 
 
+# =====================================
+# 7. 큰 글씨 메뉴
+# =====================================
 def top_navigation():
+    st.markdown("## 📌 메뉴 선택")
+
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        if st.button("🏠 처음 화면", use_container_width=True):
+        if st.button(
+            "🏠\n처음 화면",
+            use_container_width=True,
+            key="nav_home"
+        ):
             go_to("home")
 
     with col2:
-        if st.button("☕ 음료 주문", use_container_width=True):
+        if st.button(
+            "☕\n음료 주문",
+            use_container_width=True,
+            key="nav_order"
+        ):
             go_to("order")
 
     with col3:
-        if st.button("📖 이용 방법", use_container_width=True):
+        if st.button(
+            "📖\n사용 방법",
+            use_container_width=True,
+            key="nav_guide"
+        ):
             go_to("guide")
 
     with col4:
-        if st.button("❓ 자주 묻는 질문", use_container_width=True):
+        if st.button(
+            "🙋\n도움말",
+            use_container_width=True,
+            key="nav_faq"
+        ):
             go_to("faq")
 
 
@@ -293,9 +304,9 @@ def show_drink_card(drink_name, drink_info):
     )
 
 
-# -----------------------------
-# 상단 공통 메뉴
-# -----------------------------
+# =====================================
+# 8. 사이트 제목과 메뉴
+# =====================================
 st.markdown(
     "<h1 style='text-align:center;'>🌿 천천히 키오스크 ☕</h1>",
     unsafe_allow_html=True
@@ -304,24 +315,23 @@ st.markdown(
 st.markdown(
     """
     <p style="text-align:center; color:#52665a;">
-        천천히, 편안하게 연습하는 키오스크
+        누구나 편안하게 이용할 수 있는 키오스크 연습 사이트입니다.
     </p>
     """,
     unsafe_allow_html=True
 )
 
 top_navigation()
-
 st.divider()
 
 
-# -----------------------------
-# 처음 화면
-# -----------------------------
+# =====================================
+# 9. 처음 화면
+# =====================================
 if st.session_state.page == "home":
 
     st.markdown(
-        f"""
+        """
         <div class="welcome-box">
             <div style="font-size:70px;">☕ 🌿 ☕</div>
             <h1>어서 오세요!</h1>
@@ -353,9 +363,8 @@ if st.session_state.page == "home":
         ):
             go_to("guide")
 
-    st.write("")
-
-    st.subheader("🌼 이런 기능이 있어요")
+    st.divider()
+    st.subheader("🌼 편리한 기능")
 
     feature1, feature2, feature3 = st.columns(3)
 
@@ -365,30 +374,26 @@ if st.session_state.page == "home":
 
     with feature2:
         st.markdown("### ☕ 주문 연습")
-        st.write("여러 음료를 선택하며 주문 방법을 연습해요.")
+        st.write("다양한 음료를 선택하며 주문 방법을 배워요.")
 
     with feature3:
         st.markdown("### 🐢 천천히")
         st.write("서두르지 않고 단계별로 이용할 수 있어요.")
 
     st.divider()
-
     st.subheader("🔎 글씨 크기 설정")
     font_button()
 
 
-# -----------------------------
-# 음료 주문 화면
-# -----------------------------
+# =====================================
+# 10. 음료 주문 화면
+# =====================================
 elif st.session_state.page == "order":
 
     st.header("☕ 음료 주문 연습")
-    st.info("원하는 음료를 고른 뒤 주문 방법을 따라 해 보세요.")
-
-    st.subheader("1. 마시고 싶은 음료를 선택하세요.")
+    st.info("1. 원하는 음료를 선택하세요.")
 
     drink_names = list(DRINKS.keys())
-
     cols = st.columns(3)
 
     for index, drink_name in enumerate(drink_names):
@@ -410,9 +415,7 @@ elif st.session_state.page == "order":
         selected = st.session_state.selected_drink
         drink_info = DRINKS[selected]
 
-        st.success(
-            f"선택한 음료: {drink_info['emoji']} {selected}"
-        )
+        st.success(f"선택한 음료: {selected}")
 
         st.subheader("2. 음료 종류를 선택하세요.")
 
@@ -423,7 +426,7 @@ elif st.session_state.page == "order":
             key="selected_temp"
         )
 
-        st.subheader("3. 크기를 선택하세요.")
+        st.subheader("3. 음료 크기를 선택하세요.")
 
         st.radio(
             "음료 크기",
@@ -485,11 +488,9 @@ elif st.session_state.page == "order":
                 use_container_width=True,
                 key="finish_order"
             ):
-                st.session_state.page = "complete"
-                st.rerun()
+                go_to("complete")
 
     st.divider()
-
     st.subheader("🛒 장바구니")
 
     if st.session_state.cart:
@@ -524,12 +525,12 @@ elif st.session_state.page == "order":
         go_to("home")
 
 
-# -----------------------------
-# 이용 방법 화면
-# -----------------------------
+# =====================================
+# 11. 사용 방법 화면
+# =====================================
 elif st.session_state.page == "guide":
 
-    st.header("📖 키오스크 이용 방법")
+    st.header("📖 키오스크 사용 방법")
 
     st.markdown(
         """
@@ -566,8 +567,8 @@ elif st.session_state.page == "guide":
     )
 
     st.info(
-        "💡 실제 결제가 이루어지는 사이트가 아니라 "
-        "키오스크 사용 방법을 연습하는 사이트예요."
+        "💡 이 사이트는 키오스크 사용을 연습하는 사이트이며, "
+        "실제 결제는 이루어지지 않습니다."
     )
 
     if st.button(
@@ -576,13 +577,17 @@ elif st.session_state.page == "guide":
     ):
         go_to("order")
 
+    st.divider()
+    st.subheader("🔎 글씨 크기 설정")
+    font_button()
 
-# -----------------------------
-# 자주 묻는 질문 화면
-# -----------------------------
+
+# =====================================
+# 12. 도움말 화면
+# =====================================
 elif st.session_state.page == "faq":
 
-    st.header("❓ 자주 묻는 질문")
+    st.header("🙋 도움말")
 
     with st.expander("글씨가 작아서 잘 안 보여요."):
         st.write(
@@ -598,14 +603,14 @@ elif st.session_state.page == "faq":
 
     with st.expander("주문하면 실제로 결제가 되나요?"):
         st.write(
-            "아니요. 이 사이트는 키오스크 사용을 연습하는 "
-            "사이트이므로 실제 결제는 이루어지지 않아요."
+            "아니요. 이 사이트는 연습용이므로 "
+            "실제 결제는 이루어지지 않습니다."
         )
 
     with st.expander("천천히 연습해도 되나요?"):
         st.write(
-            "물론이에요! 서두를 필요 없이 원하는 만큼 "
-            "반복해서 연습할 수 있어요."
+            "물론입니다. 서두르지 말고 원하는 만큼 "
+            "반복해서 연습할 수 있습니다."
         )
 
     with st.expander("주문 금액은 어떻게 확인하나요?"):
@@ -615,14 +620,13 @@ elif st.session_state.page == "faq":
         )
 
     st.divider()
-
     st.subheader("🔎 글씨 크기 설정")
     font_button()
 
 
-# -----------------------------
-# 주문 완료 화면
-# -----------------------------
+# =====================================
+# 13. 주문 완료 화면
+# =====================================
 elif st.session_state.page == "complete":
 
     st.markdown(
@@ -661,9 +665,9 @@ elif st.session_state.page == "complete":
             go_to("home")
 
 
-# -----------------------------
-# 화면 아래 안내
-# -----------------------------
+# =====================================
+# 14. 화면 아래 안내
+# =====================================
 st.divider()
 
 st.markdown(
