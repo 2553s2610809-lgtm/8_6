@@ -38,30 +38,10 @@ if "selected_count" not in st.session_state:
 # 3. 글씨 크기 설정
 # =====================================
 FONT_SIZES = {
-    0: {
-        "name": "작은 글씨",
-        "normal": 20,
-        "title": 32,
-        "button": 20
-    },
-    1: {
-        "name": "보통 글씨",
-        "normal": 24,
-        "title": 38,
-        "button": 24
-    },
-    2: {
-        "name": "큰 글씨",
-        "normal": 28,
-        "title": 44,
-        "button": 28
-    },
-    3: {
-        "name": "아주 큰 글씨",
-        "normal": 32,
-        "title": 50,
-        "button": 32
-    }
+    0: {"name": "작은 글씨", "normal": 20, "title": 32, "button": 20},
+    1: {"name": "보통 글씨", "normal": 24, "title": 38, "button": 24},
+    2: {"name": "큰 글씨", "normal": 28, "title": 44, "button": 28},
+    3: {"name": "아주 큰 글씨", "normal": 32, "title": 50, "button": 32}
 }
 
 font_setting = FONT_SIZES[st.session_state.font_level]
@@ -250,9 +230,6 @@ def font_button():
         st.rerun()
 
 
-# =====================================
-# 7. 큰 글씨 메뉴
-# =====================================
 def top_navigation():
     st.markdown("## 📌 메뉴 선택")
 
@@ -305,18 +282,30 @@ def show_drink_card(drink_name, drink_info):
 
 
 # =====================================
-# 8. 사이트 제목과 메뉴
+# 7. 화면별 제목 설정
 # =====================================
-st.markdown(
-    "<h1 style='text-align:center;'>🌿 천천히 키오스크 ☕</h1>",
-    unsafe_allow_html=True
+PAGE_TITLES = {
+    "home": "어서 오세요",
+    "order": "원하는 음료를 골라주세요",
+    "guide": "천천히 키오스크",
+    "faq": "무엇을 도와드릴까요",
+    "complete": "주문 연습 완료!"
+}
+
+current_title = PAGE_TITLES.get(
+    st.session_state.page,
+    "천천히 키오스크"
 )
 
 st.markdown(
-    """
-    <p style="text-align:center; color:#52665a;">
-        누구나 편안하게 이용할 수 있는 키오스크 연습 사이트입니다.
-    </p>
+    f"""
+    <div style="
+        text-align:center;
+        padding: 20px 10px;
+        margin-bottom: 20px;
+    ">
+        <h1>{current_title}</h1>
+    </div>
     """,
     unsafe_allow_html=True
 )
@@ -326,15 +315,14 @@ st.divider()
 
 
 # =====================================
-# 9. 처음 화면
+# 8. 처음 화면
 # =====================================
 if st.session_state.page == "home":
 
     st.markdown(
-        """
+        f"""
         <div class="welcome-box">
             <div style="font-size:70px;">☕ 🌿 ☕</div>
-            <h1>어서 오세요!</h1>
             <div class="welcome-text">
                 키오스크 사용이 어려우셨나요?<br>
                 걱정하지 마세요.<br>
@@ -386,12 +374,11 @@ if st.session_state.page == "home":
 
 
 # =====================================
-# 10. 음료 주문 화면
+# 9. 음료 주문 화면
 # =====================================
 elif st.session_state.page == "order":
 
-    st.header("☕ 음료 주문 연습")
-    st.info("1. 원하는 음료를 선택하세요.")
+    st.info("아래에서 원하는 음료를 선택하세요.")
 
     drink_names = list(DRINKS.keys())
     cols = st.columns(3)
@@ -451,7 +438,7 @@ elif st.session_state.page == "order":
         st.markdown(
             f"""
             <div class="welcome-box">
-                <h2>🧾 주문 확인</h2>
+                <h2>주문 확인</h2>
                 <div class="welcome-text">
                     음료: {selected}<br>
                     종류: {st.session_state.selected_temp}<br>
@@ -526,11 +513,9 @@ elif st.session_state.page == "order":
 
 
 # =====================================
-# 11. 사용 방법 화면
+# 10. 사용 방법 화면
 # =====================================
 elif st.session_state.page == "guide":
-
-    st.header("📖 키오스크 사용 방법")
 
     st.markdown(
         """
@@ -567,7 +552,7 @@ elif st.session_state.page == "guide":
     )
 
     st.info(
-        "💡 이 사이트는 키오스크 사용을 연습하는 사이트이며, "
+        "이 사이트는 키오스크 사용을 연습하는 사이트이며, "
         "실제 결제는 이루어지지 않습니다."
     )
 
@@ -583,11 +568,9 @@ elif st.session_state.page == "guide":
 
 
 # =====================================
-# 12. 도움말 화면
+# 11. 도움말 화면
 # =====================================
 elif st.session_state.page == "faq":
-
-    st.header("🙋 도움말")
 
     with st.expander("글씨가 작아서 잘 안 보여요."):
         st.write(
@@ -598,7 +581,7 @@ elif st.session_state.page == "faq":
     with st.expander("음료를 잘못 선택했어요."):
         st.write(
             "다른 음료를 다시 선택하면 됩니다. "
-            "주문하기 전에 선택한 음료와 가격을 확인하세요."
+            "주문하기 전에 음료와 가격을 확인하세요."
         )
 
     with st.expander("주문하면 실제로 결제가 되나요?"):
@@ -625,7 +608,7 @@ elif st.session_state.page == "faq":
 
 
 # =====================================
-# 13. 주문 완료 화면
+# 12. 주문 완료 화면
 # =====================================
 elif st.session_state.page == "complete":
 
@@ -633,7 +616,6 @@ elif st.session_state.page == "complete":
         """
         <div class="welcome-box">
             <div style="font-size:80px;">🎉 ☕ 🎉</div>
-            <h1>주문 연습 완료!</h1>
             <div class="welcome-text">
                 키오스크 주문 연습을 잘 마쳤어요.<br>
                 천천히 따라오느라 수고하셨어요!
@@ -666,14 +648,14 @@ elif st.session_state.page == "complete":
 
 
 # =====================================
-# 14. 화면 아래 안내
+# 13. 화면 아래 안내
 # =====================================
 st.divider()
 
 st.markdown(
     """
     <p style="text-align:center; color:#52665a;">
-        🌿 천천히 키오스크 | 누구나 편안하게 이용할 수 있도록
+        천천히 키오스크 | 누구나 편안하게 이용할 수 있도록
     </p>
     """,
     unsafe_allow_html=True
