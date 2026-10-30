@@ -1,595 +1,451 @@
 
-import tkinter as tk
-from tkinter import messagebox
+import streamlit as st
 from datetime import datetime
 
-# 편한결제 - 노인 전용 간편 결제 앱
-# 시연용 가상 결제 시스템
+# -----------------------------
+# 기본 설정
+# -----------------------------
+st.set_page_config(
+    page_title="편한결제",
+    page_icon="💳",
+    layout="wide"
+)
 
 BG = "#EAF2FA"
 BLUE = "#1769AA"
 DARK_BLUE = "#174A78"
 TEXT_BLUE = "#58738D"
 SILVER = "#D7E0E8"
-WHITE = "#FFFFFF"
-FONT = "Malgun Gothic"
 
-balance = 125000
+# -----------------------------
+# 데이터 저장
+# -----------------------------
+if "balance" not in st.session_state:
+    st.session_state.balance = 125000
 
-transactions = [
-    {"kind": "결제", "name": "동네 마트",
-     "amount": -5000, "time": "오늘 오후 2:10"},
-    {"kind": "결제", "name": "동네 약국",
-     "amount": -8000, "time": "오늘 오전 11:30"},
-]
+if "transactions" not in st.session_state:
+    st.session_state.transactions = [
+        {
+            "kind": "결제",
+            "name": "동네 마트",
+            "amount": -5000,
+            "time": "오늘 오후 2:10"
+        },
+        {
+            "kind": "결제",
+            "name": "동네 약국",
+            "amount": -8000,
+            "time": "오늘 오전 11:30"
+        }
+    ]
+
+if "page" not in st.session_state:
+    st.session_state.page = "홈"
+
+# -----------------------------
+# 디자인 CSS
+# -----------------------------
+st.markdown("""
+<style>
+.stApp {
+    background-color: #EAF2FA;
+}
+
+header[data-testid="stHeader"] {
+    background-color: #EAF2FA;
+}
+
+.block-container {
+    padding-top: 1.5rem;
+    max-width: 1200px;
+}
+
+h1, h2, h3, p, label {
+    color: #174A78;
+}
+
+.balance-card {
+    background: white;
+    padding: 28px;
+    border-radius: 22px;
+    margin: 15px 0;
+}
+
+.balance-title {
+    color: #58738D;
+    font-size: 20px;
+}
+
+.balance-number {
+    color: #174A78;
+    font-size: 36px;
+    font-weight: bold;
+    margin: 8px 0;
+}
+
+.balance-info {
+    color: #58738D;
+    font-size: 17px;
+}
+
+div.stButton > button {
+    width: 100%;
+    min-height: 125px;
+    border-radius: 20px;
+    border: none;
+    background-color: white;
+    color: #174A78;
+    font-size: 23px;
+    font-weight: bold;
+}
+
+div.stButton > button:hover {
+    border: 2px solid #1769AA;
+    color: #1769AA;
+}
+
+div[data-testid="stForm"] {
+    background: white;
+    padding: 22px;
+    border-radius: 20px;
+}
+
+input {
+    font-size: 20px !important;
+}
+
+div[data-testid="stMarkdownContainer"] p {
+    font-size: 17px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# -----------------------------
+# 상단 로고
+# -----------------------------
+st.markdown("""
+<div style="
+    display:flex;
+    align-items:center;
+    gap:15px;
+    margin-bottom:20px;
+">
+    <div style="
+        background:#1769AA;
+        color:white;
+        padding:13px 20px;
+        border-radius:16px;
+        font-size:30px;
+    ">▣</div>
+
+    <div>
+        <div style="
+            font-size:27px;
+            font-weight:bold;
+            color:#174A78;
+        ">편한결제</div>
+
+        <div style="
+            font-size:17px;
+            color:#58738D;
+        ">누구나 쉽고 편하게</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# -----------------------------
+# 공통 함수
+# -----------------------------
+def go_home():
+    st.session_state.page = "홈"
 
 
-def won(amount):
-    return f"{amount:,}원"
+def add_transaction(kind, name, amount):
+    st.session_state.balance += amount
+
+    st.session_state.transactions.insert(0, {
+        "kind": kind,
+        "name": name,
+        "amount": amount,
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M")
+    })
 
 
-class EasyPayApp:
+def back_button():
+    if st.button("← 처음으로", key="back"):
+        go_home()
+        st.rerun()
 
-    def __init__(self, root):
-        self.root = root
-        self.root.title("편한결제")
-        self.root.geometry("940x590")
-        self.root.minsize(760, 540)
-        self.root.configure(bg=BG)
-        self.show_home()
 
-    def clear(self):
-        for child in self.root.winfo_children():
-            child.destroy()
+# -----------------------------
+# 홈 화면
+# -----------------------------
+def home():
 
-    def label(self, parent, text, size=16,
-              color=DARK_BLUE, bold=False, bg=WHITE):
-        return tk.Label(
-            parent,
-            text=text,
-            font=(FONT, size,
-                  "bold" if bold else "normal"),
-            fg=color,
-            bg=bg
+    st.markdown(f"""
+    <div class="balance-card">
+        <div class="balance-title">내 잔액</div>
+        <div class="balance-number">
+            {st.session_state.balance:,}원
+        </div>
+        <div class="balance-info">
+            ♢ 안전하게 관리되는 내 돈
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("▧\n결제하기\nQR코드로 간편하게",
+                     key="pay_home"):
+            st.session_state.page = "결제"
+            st.rerun()
+
+    with col2:
+        if st.button("➤\n송금하기\n소중한 분께 간편하게",
+                     key="send_home"):
+            st.session_state.page = "송금"
+            st.rerun()
+
+    col3, col4 = st.columns(2)
+
+    with col3:
+        if st.button("▤\n사용 내역\n돈 쓴 기록 확인",
+                     key="history_home"):
+            st.session_state.page = "내역"
+            st.rerun()
+
+    with col4:
+        if st.button("☏\n도움받기\n사용 방법 안내",
+                     key="help_home"):
+            st.session_state.page = "도움"
+            st.rerun()
+
+    st.caption("시연용 앱 · 실제 금융기관과 연결되어 있지 않습니다.")
+
+
+# -----------------------------
+# 결제 화면
+# -----------------------------
+def payment():
+
+    st.title("💳 결제하기")
+    st.write("결제할 곳과 금액을 입력해 주세요.")
+
+    st.write(f"현재 잔액: **{st.session_state.balance:,}원**")
+
+    with st.form("payment_form"):
+
+        shop = st.text_input("가게 이름")
+        amount = st.number_input(
+            "결제 금액 (원)",
+            min_value=0,
+            step=1000
         )
 
-    def button(self, parent, text, command,
-               bg=WHITE, fg=DARK_BLUE,
-               size=19, height=2):
-
-        return tk.Button(
-            parent,
-            text=text,
-            command=command,
-            bg=bg,
-            fg=fg,
-            activebackground=bg,
-            activeforeground=fg,
-            font=(FONT, size, "bold"),
-            relief="flat",
-            bd=0,
-            cursor="hand2",
-            height=height
+        submitted = st.form_submit_button(
+            "결제 확인",
+            use_container_width=True
         )
 
-    # 상단 로고 및 제목
-    def header(self, parent):
+        if submitted:
 
-        bar = tk.Frame(parent, bg=BG)
-        bar.pack(fill="x", padx=14, pady=(14, 16))
+            if not shop.strip():
+                st.warning("가게 이름을 입력해 주세요.")
 
-        logo = tk.Label(
-            bar,
-            text="▣",
-            bg=BLUE,
-            fg=WHITE,
-            font=(FONT, 26, "bold"),
-            width=3,
-            height=1
-        )
-        logo.pack(side="left", padx=(0, 12), ipady=7)
+            elif amount <= 0:
+                st.warning("결제 금액을 입력해 주세요.")
 
-        titlebox = tk.Frame(bar, bg=BG)
-        titlebox.pack(side="left")
+            elif amount > st.session_state.balance:
+                st.error("잔액이 부족합니다.")
 
-        self.label(
-            titlebox, "편한결제", 22,
-            DARK_BLUE, True, BG
-        ).pack(anchor="w")
+            else:
+                st.session_state.pending = {
+                    "kind": "결제",
+                    "name": shop.strip(),
+                    "amount": int(amount)
+                }
 
-        self.label(
-            titlebox, "누구나 쉽고 편하게",
-            13, TEXT_BLUE, False, BG
-        ).pack(anchor="w")
+    if "pending" in st.session_state:
+        item = st.session_state.pending
 
-        tk.Button(
-            bar,
-            text="?",
-            command=self.show_help,
-            bg=BG,
-            fg=BLUE,
-            font=(FONT, 18, "bold"),
-            relief="flat",
-            bd=0
-        ).pack(side="right", padx=8)
-
-    # 첫 화면
-    def show_home(self):
-
-        self.clear()
-        self.root.configure(bg=BG)
-
-        self.header(self.root)
-
-        balance_card = tk.Frame(
-            self.root, bg=WHITE
-        )
-        balance_card.pack(
-            fill="x",
-            padx=14,
-            pady=(0, 14),
-            ipady=17
-        )
-
-        self.label(
-            balance_card, "내 잔액",
-            15, TEXT_BLUE
-        ).pack(anchor="w", padx=20, pady=(8, 5))
-
-        self.label(
-            balance_card, won(balance),
-            28, DARK_BLUE, True
-        ).pack(anchor="w", padx=20, pady=2)
-
-        self.label(
-            balance_card,
-            "♢ 안전하게 관리되는 내 돈",
-            14, TEXT_BLUE
-        ).pack(anchor="w", padx=20, pady=(6, 4))
-
-        grid = tk.Frame(self.root, bg=BG)
-        grid.pack(
-            fill="both",
-            expand=True,
-            padx=14,
-            pady=(0, 12)
-        )
-
-        grid.columnconfigure(0, weight=1)
-        grid.columnconfigure(1, weight=1)
-        grid.rowconfigure(0, weight=1)
-        grid.rowconfigure(1, weight=1)
-
-        self.home_tile(
-            grid, "▧", "결제하기",
-            "QR코드로 간편하게",
-            self.show_pay, BLUE, WHITE, 0, 0
-        )
-
-        self.home_tile(
-            grid, "➤", "송금하기",
-            "소중한 분께 간편하게",
-            self.show_transfer,
-            WHITE, DARK_BLUE, 0, 1
-        )
-
-        self.home_tile(
-            grid, "▤", "사용 내역",
-            "돈 쓴 기록 확인",
-            self.show_history,
-            WHITE, DARK_BLUE, 1, 0
-        )
-
-        self.home_tile(
-            grid, "☏", "도움받기",
-            "사용 방법 안내",
-            self.show_help,
-            SILVER, DARK_BLUE, 1, 1
-        )
-
-        self.label(
-            self.root,
-            "시연용 앱 · 실제 금융기관과 연결되어 있지 않습니다.",
-            9, TEXT_BLUE, bg=BG
-        ).pack(pady=(0, 7))
-
-    # 메인 메뉴 버튼
-    def home_tile(self, parent, icon, title,
-                  subtitle, command, bg, fg, row, col):
-
-        tile = tk.Frame(parent, bg=bg)
-
-        tile.grid(
-            row=row,
-            column=col,
-            sticky="nsew",
-            padx=(0, 7) if col == 0 else (7, 0),
-            pady=(0, 7) if row == 0 else (7, 0)
-        )
-
-        tile.grid_propagate(False)
-
-        btn = tk.Button(
-            tile,
-            text=f"{icon}\n{title}\n{subtitle}",
-            command=command,
-            bg=bg,
-            fg=fg,
-            activebackground=bg,
-            activeforeground=fg,
-            font=(FONT, 17 if title == "결제하기" else 16, "bold"),
-            relief="flat",
-            bd=0,
-            cursor="hand2",
-            justify="center",
-            wraplength=320
-        )
-
-        btn.pack(fill="both", expand=True, padx=5, pady=5)
-
-    # 공통 화면
-    def page_shell(self, title, subtitle=""):
-
-        self.clear()
-        self.root.configure(bg=BG)
-
-        self.header(self.root)
-
-        panel = tk.Frame(self.root, bg=WHITE)
-        panel.pack(
-            fill="both",
-            expand=True,
-            padx=14,
-            pady=(0, 14)
-        )
-
-        self.label(
-            panel, title, 25,
-            DARK_BLUE, True
-        ).pack(anchor="w", padx=24, pady=(22, 4))
-
-        if subtitle:
-            self.label(
-                panel, subtitle, 14,
-                TEXT_BLUE
-            ).pack(anchor="w", padx=24, pady=(0, 16))
-
-        return panel
-
-    # 입력창
-    def make_entry(self, parent, caption, initial=""):
-
-        self.label(
-            parent, caption, 16,
-            DARK_BLUE, True
-        ).pack(anchor="w", padx=24, pady=(12, 5))
-
-        entry = tk.Entry(
-            parent,
-            font=(FONT, 19),
-            relief="solid",
-            bd=1,
-            fg=DARK_BLUE
-        )
-
-        entry.pack(fill="x", padx=24, ipady=9)
-
-        if initial:
-            entry.insert(0, initial)
-
-        return entry
-
-    # 하단 버튼
-    def make_action_row(self, parent,
-                        primary_text, primary_command):
-
-        row = tk.Frame(parent, bg=WHITE)
-        row.pack(fill="x", padx=24, pady=20)
-
-        self.button(
-            row, "처음으로",
-            self.show_home,
-            SILVER, DARK_BLUE,
-            14, 1
-        ).pack(
-            side="left",
-            fill="x",
-            expand=True,
-            padx=(0, 8),
-            ipady=5
-        )
-
-        self.button(
-            row, primary_text,
-            primary_command,
-            BLUE, WHITE,
-            14, 1
-        ).pack(
-            side="left",
-            fill="x",
-            expand=True,
-            padx=(8, 0),
-            ipady=5
-        )
-
-    # 결제 화면
-    def show_pay(self):
-
-        panel = self.page_shell(
-            "결제하기",
-            "결제할 곳과 금액을 입력해 주세요."
-        )
-
-        shop = self.make_entry(
-            panel, "가게 이름", "동네 가게"
-        )
-
-        amount = self.make_entry(
-            panel, "결제 금액 (원)"
-        )
-
-        self.label(
-            panel,
-            f"현재 잔액: {won(balance)}",
-            15, TEXT_BLUE
-        ).pack(anchor="w", padx=24, pady=12)
-
-        def confirm():
-
-            name = shop.get().strip() or "가게"
-            value = self.parse_amount(amount.get())
-
-            if value is None:
-                return
-
-            if value > balance:
-                messagebox.showwarning(
-                    "잔액 부족",
-                    "잔액이 부족합니다. 금액을 확인해 주세요."
-                )
-                return
-
-            if not messagebox.askyesno(
-                "결제 확인",
-                f"{name}에서 {won(value)} 결제할까요?"
-            ):
-                return
-
-            self.add_transaction(
-                "결제", name, -value
+        if item["kind"] == "결제":
+            st.warning(
+                f"{item['name']}에서 "
+                f"{item['amount']:,}원을 결제할까요?"
             )
 
-            messagebox.showinfo(
-                "결제 완료",
-                f"{won(value)} 결제가 완료되었습니다.\n(시연용)"
+            c1, c2 = st.columns(2)
+
+            with c1:
+                if st.button("최종 결제하기"):
+                    if item["amount"] <= st.session_state.balance:
+                        add_transaction(
+                            "결제",
+                            item["name"],
+                            -item["amount"]
+                        )
+                        del st.session_state.pending
+                        st.success("결제가 완료되었습니다!")
+                        st.rerun()
+
+            with c2:
+                if st.button("취소"):
+                    del st.session_state.pending
+                    st.rerun()
+
+    back_button()
+
+
+# -----------------------------
+# 송금 화면
+# -----------------------------
+def transfer():
+
+    st.title("➤ 송금하기")
+    st.write("받는 분과 금액을 입력해 주세요.")
+
+    st.write(f"현재 잔액: **{st.session_state.balance:,}원**")
+
+    with st.form("transfer_form"):
+
+        recipient = st.text_input("받는 분 이름")
+
+        amount = st.number_input(
+            "송금 금액 (원)",
+            min_value=0,
+            step=1000
+        )
+
+        submitted = st.form_submit_button(
+            "송금 확인",
+            use_container_width=True
+        )
+
+        if submitted:
+
+            if not recipient.strip():
+                st.warning("받는 분 이름을 입력해 주세요.")
+
+            elif amount <= 0:
+                st.warning("송금 금액을 입력해 주세요.")
+
+            elif amount > st.session_state.balance:
+                st.error("잔액이 부족합니다.")
+
+            else:
+                st.session_state.pending = {
+                    "kind": "송금",
+                    "name": recipient.strip(),
+                    "amount": int(amount)
+                }
+
+    if "pending" in st.session_state:
+        item = st.session_state.pending
+
+        if item["kind"] == "송금":
+            st.warning(
+                f"{item['name']}님에게 "
+                f"{item['amount']:,}원을 송금할까요?"
             )
 
-            self.show_home()
+            c1, c2 = st.columns(2)
 
-        self.make_action_row(
-            panel, "결제 확인", confirm
-        )
+            with c1:
+                if st.button("최종 송금하기"):
+                    if item["amount"] <= st.session_state.balance:
+                        add_transaction(
+                            "송금",
+                            item["name"],
+                            -item["amount"]
+                        )
+                        del st.session_state.pending
+                        st.success("송금 처리가 완료되었습니다!")
+                        st.rerun()
 
-    # 송금 화면
-    def show_transfer(self):
+            with c2:
+                if st.button("취소"):
+                    del st.session_state.pending
+                    st.rerun()
 
-        panel = self.page_shell(
-            "송금하기",
-            "받는 분과 금액을 확인한 뒤 송금해 주세요."
-        )
+    back_button()
 
-        recipient = self.make_entry(
-            panel, "받는 분 이름"
-        )
 
-        amount = self.make_entry(
-            panel, "송금 금액 (원)"
-        )
+# -----------------------------
+# 사용 내역 화면
+# -----------------------------
+def history():
 
-        self.label(
-            panel,
-            f"현재 잔액: {won(balance)}",
-            15, TEXT_BLUE
-        ).pack(anchor="w", padx=24, pady=12)
+    st.title("📋 사용 내역")
+    st.write("최근 결제 및 송금 기록입니다.")
 
-        def confirm():
+    for item in st.session_state.transactions:
 
-            name = recipient.get().strip()
+        with st.container(border=True):
 
-            if not name:
-                messagebox.showwarning(
-                    "이름 확인",
-                    "받는 분 이름을 입력해 주세요."
+            c1, c2 = st.columns([3, 1])
+
+            with c1:
+                st.subheader(
+                    f"{item['kind']} · {item['name']}"
                 )
-                return
+                st.caption(item["time"])
 
-            value = self.parse_amount(amount.get())
-
-            if value is None:
-                return
-
-            if value > balance:
-                messagebox.showwarning(
-                    "잔액 부족",
-                    "잔액이 부족합니다."
-                )
-                return
-
-            if not messagebox.askyesno(
-                "송금 확인",
-                f"{name}님에게 {won(value)} 송금할까요?\n\n시연용 가상 송금입니다."
-            ):
-                return
-
-            self.add_transaction(
-                "송금", name, -value
-            )
-
-            messagebox.showinfo(
-                "송금 완료",
-                f"{name}님에게 {won(value)} 송금 처리되었습니다.\n(시연용)"
-            )
-
-            self.show_home()
-
-        self.make_action_row(
-            panel, "송금 확인", confirm
-        )
-
-    # 금액 확인
-    def parse_amount(self, raw):
-
-        try:
-            value = int(raw.replace(",", "").strip())
-
-            if value <= 0:
-                raise ValueError
-
-            return value
-
-        except (ValueError, AttributeError):
-
-            messagebox.showwarning(
-                "금액 확인",
-                "0보다 큰 금액을 숫자로 입력해 주세요."
-            )
-
-            return None
-
-    # 거래 기록 및 잔액 변경
-    def add_transaction(self, kind, name, amount):
-
-        global balance
-
-        balance += amount
-
-        transactions.insert(0, {
-            "kind": kind,
-            "name": name,
-            "amount": amount,
-            "time": datetime.now().strftime("%Y-%m-%d %H:%M")
-        })
-
-    # 사용 내역 화면
-    def show_history(self):
-
-        panel = self.page_shell(
-            "사용 내역",
-            "최근 결제 및 송금 기록입니다."
-        )
-
-        if not transactions:
-
-            self.label(
-                panel, "아직 사용 내역이 없습니다.",
-                17, TEXT_BLUE
-            ).pack(anchor="w", padx=24, pady=20)
-
-        else:
-
-            for item in transactions:
-
-                row = tk.Frame(
-                    panel,
-                    bg=WHITE,
-                    highlightbackground="#DCE5ED",
-                    highlightthickness=1
+            with c2:
+                st.markdown(
+                    f"### {item['amount']:+,}원"
                 )
 
-                row.pack(fill="x", padx=24, pady=5)
-
-                left = tk.Frame(row, bg=WHITE)
-                left.pack(
-                    side="left",
-                    fill="x",
-                    expand=True,
-                    padx=12,
-                    pady=9
-                )
-
-                self.label(
-                    left,
-                    f"{item['kind']} · {item['name']}",
-                    15, DARK_BLUE, True
-                ).pack(anchor="w")
-
-                self.label(
-                    left, item["time"],
-                    11, TEXT_BLUE
-                ).pack(anchor="w", pady=(3, 0))
-
-                color = (
-                    BLUE if item["amount"] > 0
-                    else DARK_BLUE
-                )
-
-                self.label(
-                    row,
-                    f"{item['amount']:+,}원",
-                    15, color, True
-                ).pack(side="right", padx=14)
-
-        self.button(
-            panel, "홈으로 돌아가기",
-            self.show_home,
-            BLUE, WHITE, 15, 1
-        ).pack(fill="x", padx=24, pady=20, ipady=5)
-
-    # 도움말 화면
-    def show_help(self):
-
-        panel = self.page_shell(
-            "도움받기",
-            "편한결제를 사용하는 방법을 안내해 드립니다."
-        )
-
-        tips = [
-            (
-                "1. 결제하기",
-                "가게 이름과 금액을 입력하고 결제 확인을 누르세요."
-            ),
-            (
-                "2. 송금하기",
-                "받는 분 이름과 금액을 입력한 뒤 내용을 확인하세요."
-            ),
-            (
-                "3. 사용 내역",
-                "결제와 송금 기록을 확인할 수 있습니다."
-            ),
-            (
-                "4. 안전하게 사용하기",
-                "확인 화면에서 이름과 금액을 꼭 살펴보세요."
-            )
-        ]
-
-        for heading, desc in tips:
-
-            block = tk.Frame(panel, bg=WHITE)
-            block.pack(fill="x", padx=24, pady=8)
-
-            self.label(
-                block, heading,
-                16, DARK_BLUE, True
-            ).pack(anchor="w")
-
-            self.label(
-                block, desc,
-                13, TEXT_BLUE
-            ).pack(anchor="w", pady=(3, 0))
-
-        self.button(
-            panel, "홈으로 돌아가기",
-            self.show_home,
-            BLUE, WHITE, 15, 1
-        ).pack(fill="x", padx=24, pady=18, ipady=5)
+    back_button()
 
 
-# 프로그램 실행
-if __name__ == "__main__":
+# -----------------------------
+# 도움받기 화면
+# -----------------------------
+def help_page():
 
-    root = tk.Tk()
+    st.title("☎ 도움받기")
+    st.write("편한결제를 사용하는 방법을 안내해 드립니다.")
 
-    app = EasyPayApp(root)
+    tips = [
+        ("1. 결제하기",
+         "가게 이름과 금액을 입력하고 결제 확인을 누르세요."),
 
-    root.mainloop()
+        ("2. 송금하기",
+         "받는 분 이름과 금액을 입력한 뒤 내용을 확인하세요."),
 
+        ("3. 사용 내역",
+         "결제와 송금 기록을 확인할 수 있습니다."),
+
+        ("4. 안전하게 사용하기",
+         "확인 화면에서 이름과 금액을 꼭 살펴보세요.")
+    ]
+
+    for title, description in tips:
+
+        with st.container(border=True):
+            st.subheader(title)
+            st.write(description)
+
+    back_button()
+
+
+# -----------------------------
+# 화면 이동
+# -----------------------------
+if st.session_state.page == "홈":
+    home()
+
+elif st.session_state.page == "결제":
+    payment()
+
+elif st.session_state.page == "송금":
+    transfer()
+
+elif st.session_state.page == "내역":
+    history()
+
+elif st.session_state.page == "도움":
+    help_page()
